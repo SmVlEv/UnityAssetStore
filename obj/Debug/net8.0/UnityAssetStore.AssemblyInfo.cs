@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UnityAssetStore")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5da6d52c598e9680702a7977ac74436bc5cff972")]
 [assembly: System.Reflection.AssemblyProductAttribute("UnityAssetStore")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UnityAssetStore")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

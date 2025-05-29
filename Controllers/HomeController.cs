@@ -16,7 +16,7 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        // Можно передать список популярных товаров или категории
+        ViewData["Title"] = "Главная";
         return View();
     }
 
@@ -24,4 +24,6 @@ public class HomeController : Controller
     {
         return View();
     }
+
+
 }

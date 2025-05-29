@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using UnityAssetStore.Models.Identity;
+using UnityAssetStore.ViewModels;
 
 namespace UnityAssetStore.Controllers
 {

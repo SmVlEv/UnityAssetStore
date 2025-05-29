@@ -17,11 +17,12 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\" />
-    <Folder Include="Services\" />
+    <Folder Include="Data\Migrations\" />
+    <Folder Include="wwwroot\uploads\assets\" />
   </ItemGroup>
 
 </Project>

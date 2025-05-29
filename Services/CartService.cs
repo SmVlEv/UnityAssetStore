@@ -1,4 +1,5 @@
-﻿using UnityAssetStore.Models;
+﻿using Newtonsoft.Json;
+using UnityAssetStore.Models;
 
 namespace UnityAssetStore.Services
 {

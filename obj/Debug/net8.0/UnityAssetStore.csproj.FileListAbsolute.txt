@@ -445,3 +445,6 @@ C:\Users\SVEK\source\repos\UnityAssetStore\UnityAssetStore\obj\Debug\net8.0\refi
 C:\Users\SVEK\source\repos\UnityAssetStore\UnityAssetStore\obj\Debug\net8.0\UnityAssetStore.pdb
 C:\Users\SVEK\source\repos\UnityAssetStore\UnityAssetStore\obj\Debug\net8.0\UnityAssetStore.genruntimeconfig.cache
 C:\Users\SVEK\source\repos\UnityAssetStore\UnityAssetStore\obj\Debug\net8.0\ref\UnityAssetStore.dll
+C:\Users\SVEK\source\repos\UnityAssetStore\UnityAssetStore\obj\Debug\net8.0\UnityAssetStore.sourcelink.json
+C:\Users\SVEK\source\repos\UnityAssetStore\UnityAssetStore\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Users\SVEK\source\repos\UnityAssetStore\UnityAssetStore\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
