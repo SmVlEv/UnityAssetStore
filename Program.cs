@@ -6,8 +6,6 @@ using UnityAssetStore.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавление сервисов в контейнер DI
-
 // 1. Подключение к SQL Server через EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -21,7 +19,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-// 3. Добавляем Session (один раз!)
+// 3. Добавляем Session
 builder.Services.AddDistributedMemoryCache(); // Требуется для Session
 builder.Services.AddSession(options =>
 {
@@ -33,10 +31,13 @@ builder.Services.AddSession(options =>
 // 4. MVC
 builder.Services.AddControllersWithViews();
 
-// 5. Регистрация пользовательских сервисов
+// 5. Регистрация сервисов
 builder.Services.AddScoped<IAssetService, AssetService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+
+// 6. Добавь Razor Pages (если используешь Identity UI)
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
@@ -53,24 +54,35 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // wwwroot
+app.UseStaticFiles();
 app.UseRouting();
 
-// Аутентификация и авторизация
-app.UseAuthentication(); // Только если используется Identity
+// Middleware для работы с Session и Identity
+app.UseSession();
+app.UseAuthentication();
 app.UseAuthorization();
 
-// Включаем Session Middleware
-app.UseSession(); // <-- ПОСЛЕ UseRouting()
+// Создание ролей при старте приложения
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    if (!await roleManager.RoleExistsAsync("User"))
+        await roleManager.CreateAsync(new IdentityRole("User"));
+
+    if (!await roleManager.RoleExistsAsync("Admin"))
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+}
 
 // Маршруты
+app.MapControllerRoute(
+    name: "Admin",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Areas (админка)
-app.MapControllerRoute(
-    name: "Admin",
-    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+app.MapRazorPages(); // Для Identity UI
 
 app.Run();

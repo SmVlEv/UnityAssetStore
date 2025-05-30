@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using UnityAssetStore.Models;
+using UnityAssetStore.Models.Identity;
 
 namespace UnityAssetStore.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -22,12 +24,10 @@ namespace UnityAssetStore.Data
 
             // 🔹 Seed данных: категории по умолчанию
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1, Name = "3D Models" },
-                new Category { Id = 2, Name = "Scripts" },
-                new Category { Id = 3, Name = "Textures" },
-                new Category { Id = 4, Name = "Sound Effects" },
-                new Category { Id = 5, Name = "UI Kits" }
-            );
+            new Category { Id = 1, Name = "3D Models" },
+            new Category { Id = 2, Name = "Scripts" },
+            new Category { Id = 3, Name = "Textures" }
+        );
             modelBuilder.Entity<CartItem>()
         .HasOne(c => c.Asset)
         .WithMany()
