@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using UnityAssetStore.Models;
 using UnityAssetStore.Services;
 
 namespace UnityAssetStore.Controllers
@@ -19,7 +20,15 @@ namespace UnityAssetStore.Controllers
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var cartItems = _cartService.GetCartItems(userId);
-                return View(cartItems);
+
+                // Преобразуем в ShoppingCart
+                var shoppingCart = new ShoppingCart();
+                foreach (var item in cartItems)
+                {
+                    shoppingCart.Items.Add(item); // CartItem наследуется от CartItem
+                }
+
+                return View(shoppingCart);
             }
             else
             {
