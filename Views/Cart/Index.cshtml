@@ -21,7 +21,7 @@ else
             @foreach (var item in Model.Items)
             {
                 <tr>
-                    <td>@item.Asset.Name</td>
+                    <td>@(item.Asset != null ? item.Asset.Name : "Неизвестный товар")</td> <!-- Обработка null -->
                     <td>@item.Quantity</td>
                     <td>@(item.Asset.Price * item.Quantity)</td>
                     <td>

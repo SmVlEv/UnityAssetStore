@@ -1,63 +1,141 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using UnityAssetStore.Data;
 using UnityAssetStore.Models;
+using UnityAssetStore.Services;
+using System.Linq;
 
-namespace UnityAssetStore.Services
+public class CartService : ICartService
 {
-    public class CartService : ICartService
+    private readonly AppDbContext _context;
+    private const string SessionKey = "ShoppingCart";
+
+    public CartService(AppDbContext context)
     {
-        private const string SessionKey = "ShoppingCart";
+        _context = context;
+    }
 
-        public ShoppingCart GetCart(ISession session)
+    // --- Работа с Session (для неавторизованных пользователей) ---
+
+    public ShoppingCart GetCart(ISession session)
+    {
+        var cartJson = session.GetString(SessionKey);
+        if (string.IsNullOrEmpty(cartJson))
+            return new ShoppingCart();
+
+        var cart = JsonConvert.DeserializeObject<ShoppingCart>(cartJson);
+
+        // Загрузка данных о товарах
+        foreach (var item in cart.Items)
         {
-            var cartJson = session.GetString(SessionKey);
-            if (string.IsNullOrEmpty(cartJson))
-            {
-                return new ShoppingCart();
-            }
-            return JsonConvert.DeserializeObject<ShoppingCart>(cartJson);
+            item.Asset = _context.Assets.Find(item.AssetId);
         }
 
-        public ShoppingCart AddToCart(ISession session, int assetId)
+        return cart;
+    }
+
+    public ShoppingCart AddToCart(ISession session, int assetId)
+    {
+        var cart = GetCart(session);
+
+        var asset = _context.Assets.Find(assetId);
+        if (asset == null)
+            throw new ArgumentException("Товар не найден", nameof(assetId));
+
+        var item = cart.Items.FirstOrDefault(i => i.AssetId == assetId);
+        if (item == null)
         {
-            var cart = GetCart(session);
+            cart.Items.Add(new CartItem { AssetId = assetId, Quantity = 1 });
+        }
+        else
+        {
+            item.Quantity++;
+        }
 
-            var item = cart.Items.FirstOrDefault(i => i.AssetId == assetId);
-            if (item == null)
-            {
-                cart.Items.Add(new CartItem { AssetId = assetId, Quantity = 1 });
-            }
-            else
-            {
-                item.Quantity++;
-            }
+        // Загрузим Asset для корректного отображения
+        foreach (var cartItem in cart.Items)
+        {
+            cartItem.Asset = _context.Assets.Find(cartItem.AssetId);
+        }
 
+        SaveCart(session, cart);
+        return cart;
+    }
+
+    public ShoppingCart RemoveFromCart(ISession session, int assetId)
+    {
+        var cart = GetCart(session);
+        var item = cart.Items.FirstOrDefault(i => i.AssetId == assetId);
+
+        if (item != null)
+        {
+            cart.Items.Remove(item);
             SaveCart(session, cart);
-            return cart;
         }
 
-        public ShoppingCart RemoveFromCart(ISession session, int assetId)
-        {
-            var cart = GetCart(session);
-            var item = cart.Items.FirstOrDefault(i => i.AssetId == assetId);
+        return cart;
+    }
 
-            if (item != null)
+    public void ClearCart(ISession session)
+    {
+        session.Remove(SessionKey);
+    }
+
+    private void SaveCart(ISession session, ShoppingCart cart)
+    {
+        var cartJson = JsonConvert.SerializeObject(cart);
+        session.SetString(SessionKey, cartJson);
+    }
+
+    // --- Работа с UserId (для авторизованных пользователей) ---
+
+    public void AddToCart(string userId, int assetId)
+    {
+        var existingItem = _context.CartItems
+            .Where(c => c.UserId == userId && c.AssetId == assetId)
+            .Include(c => c.Asset)
+            .FirstOrDefault();
+
+        if (existingItem == null)
+        {
+            var asset = _context.Assets.Find(assetId);
+            if (asset == null)
+                throw new ArgumentException("Товар не найден", nameof(assetId));
+
+            _context.CartItems.Add(new CartItem
             {
-                cart.Items.Remove(item);
-                SaveCart(session, cart);
-            }
-
-            return cart;
+                UserId = userId,
+                AssetId = assetId,
+                Quantity = 1
+            });
         }
-
-        public void ClearCart(ISession session)
+        else
         {
-            session.Remove(SessionKey);
+            existingItem.Quantity += 1;
         }
 
-        private void SaveCart(ISession session, ShoppingCart cart)
+        _context.SaveChanges();
+    }
+
+    public void RemoveFromCart(string userId, int assetId)
+    {
+        var item = _context.CartItems
+            .Include(c => c.Asset)
+            .FirstOrDefault(c => c.UserId == userId && c.AssetId == assetId);
+
+        if (item != null)
         {
-            var cartJson = JsonConvert.SerializeObject(cart);
-            session.SetString(SessionKey, cartJson);
+            _context.CartItems.Remove(item);
+            _context.SaveChanges();
         }
+    }
+
+    public IEnumerable<CartItem> GetCartItems(string userId)
+    {
+        return _context.CartItems
+            .Where(c => c.UserId == userId)
+            .Include(c => c.Asset) // обязательно загружаем связь с Asset
+            .ToList();
     }
 }

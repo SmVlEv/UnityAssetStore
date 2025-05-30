@@ -9,12 +9,12 @@ namespace UnityAssetStore.Data
         {
         }
 
-        // Таблицы БД
         public DbSet<Asset> Assets { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,6 +28,10 @@ namespace UnityAssetStore.Data
                 new Category { Id = 4, Name = "Sound Effects" },
                 new Category { Id = 5, Name = "UI Kits" }
             );
+            modelBuilder.Entity<CartItem>()
+        .HasOne(c => c.Asset)
+        .WithMany()
+        .HasForeignKey(c => c.AssetId);
 
             // 🔹 Seed данных: товары по умолчанию
             modelBuilder.Entity<Asset>().HasData(

@@ -7,30 +7,12 @@ using UnityAssetStore.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Добавление сервисов в контейнер DI
-builder.Services.AddControllersWithViews();
 
-// Подключение к SQL Server через EF Core
+// 1. Подключение к SQL Server через EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Регистрация сервисов
-builder.Services.AddScoped<IAssetService, AssetService>();
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-
-// Настройка Identity (если используется)
-// builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-//     .AddEntityFrameworkStores<AppDbContext>()
-//     .AddDefaultTokenProviders();
-
-// Другие сервисы
-builder.Services.AddSession(options =>
-{
-    options.Cookie.Name = ".UnityAssetStore.Cart";
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.IsEssential = true;
-});
-
+// 2. Identity: используем ApplicationUser и IdentityRole
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -39,9 +21,27 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
+// 3. Добавляем Session (один раз!)
+builder.Services.AddDistributedMemoryCache(); // Требуется для Session
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.Name = ".UnityAssetStore.Cart";
+    options.Cookie.IsEssential = true;
+});
+
+// 4. MVC
+builder.Services.AddControllersWithViews();
+
+// 5. Регистрация пользовательских сервисов
+builder.Services.AddScoped<IAssetService, AssetService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
 var app = builder.Build();
 
 // Конфигурация middleware
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -56,15 +56,19 @@ app.UseHttpsRedirection();
 app.UseStaticFiles(); // wwwroot
 app.UseRouting();
 
-app.UseAuthentication(); // Если используется Identity
+// Аутентификация и авторизация
+app.UseAuthentication(); // Только если используется Identity
 app.UseAuthorization();
+
+// Включаем Session Middleware
+app.UseSession(); // <-- ПОСЛЕ UseRouting()
 
 // Маршруты
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Админка (Areas)
+// Areas (админка)
 app.MapControllerRoute(
     name: "Admin",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");

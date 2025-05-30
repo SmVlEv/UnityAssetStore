@@ -13,10 +13,39 @@
             <h2>@Model.Name</h2>
             <p><strong>Цена:</strong> @Model.Price.ToString("C")</p>
             <p>@Model.Description</p>
-            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+
+            <!-- Форма добавления в корзину -->
+            <form id="addToCartForm" asp-controller="Cart" asp-action="AddToCart" method="post">
                 <input type="hidden" name="assetId" value="@Model.Id" />
                 <button type="submit" class="btn btn-success">Добавить в корзину</button>
             </form>
         </div>
     </div>
 </div>
+
+<!-- Секция скриптов -->
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#addToCartForm').on('submit', function (e) {
+                e.preventDefault(); // Предотвращаем стандартную отправку формы
+
+                var form = $(this);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize(),
+                    success: function () {
+                        alert('Товар успешно добавлен в корзину!');
+                        // Можно обновить корзину динамически или изменить текст кнопки
+                    },
+                    error: function () {
+                        alert('Ошибка при добавлении товара.');
+                    }
+                });
+            });
+        });
+    </script>
+}
