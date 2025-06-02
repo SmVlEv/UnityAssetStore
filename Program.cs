@@ -57,21 +57,39 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// Middleware для работы с Session и Identity
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Создание ролей при старте приложения
+// --- Создание ролей и админа ---
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
+    // Создание ролей
     if (!await roleManager.RoleExistsAsync("User"))
         await roleManager.CreateAsync(new IdentityRole("User"));
 
     if (!await roleManager.RoleExistsAsync("Admin"))
         await roleManager.CreateAsync(new IdentityRole("Admin"));
+
+    // Создание администратора
+    var adminUser = await userManager.FindByNameAsync("admin");
+
+    if (adminUser == null)
+    {
+        adminUser = new ApplicationUser
+        {
+            UserName = "admin",
+            Email = "admin@example.com",
+            FirstName = "Иван",
+            LastName = "Админов"
+        };
+
+        await userManager.CreateAsync(adminUser, "A@dm1nPassw0rd");
+        await userManager.AddToRoleAsync(adminUser, "Admin");
+    }
 }
 
 // Маршруты
@@ -83,6 +101,6 @@ app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
-app.MapRazorPages(); // Для Identity UI
+app.MapRazorPages();
 
 app.Run();

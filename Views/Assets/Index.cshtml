@@ -1,24 +1,41 @@
 ﻿@model IEnumerable<UnityAssetStore.Models.Asset>
 
-@{
-    ViewData["Title"] = "Каталог товаров";
+<h2>Каталог активов</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Описание</th>
+            <th>Цена</th>
+            <th>Категория</th>
+            @if (User.IsInRole("Admin"))
+            {
+                <th>Действие</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var asset in Model)
+        {
+            <tr>
+                <td>@asset.Name</td>
+                <td>@asset.Description</td>
+                <td>@asset.Price.ToString("C")</td>
+                <td>@asset.Category?.Name</td>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <td>
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Edit" asp-route-id="@asset.Id" class="btn btn-warning btn-sm">Редактировать</a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (User.IsInRole("Admin"))
+{
+    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Add" class="btn btn-success">Добавить товар</a>
 }
-
-<h2>Каталог Unity Assets</h2>
-
-<div class="row">
-    @foreach (var asset in Model)
-    {
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="@asset.PreviewImageUrl" class="card-img-top" alt="@asset.Name" />
-                <div class="card-body">
-                    <h5 class="card-title">@asset.Name</h5>
-                    <p class="card-text">@asset.Description</p>
-                    <p class="card-text text-danger"><strong>@asset.Price.ToString("C")</strong></p>
-                    <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@asset.Id">Подробнее</a>
-                </div>
-            </div>
-        </div>
-    }
-</div>

@@ -1,4 +1,5 @@
-﻿using UnityAssetStore.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using UnityAssetStore.Data;
 using UnityAssetStore.Models;
 
 namespace UnityAssetStore.Services
@@ -14,12 +15,16 @@ namespace UnityAssetStore.Services
 
         public IEnumerable<Asset> GetAllAssets()
         {
-            return _context.Assets.ToList();
+            return _context.Assets
+                .Include(a => a.Category)
+                .ToList();
         }
 
         public Asset GetAssetById(int id)
         {
-            return _context.Assets.Find(id);
+            return _context.Assets
+                .Include(a => a.Category)
+                .FirstOrDefault(a => a.Id == id);
         }
 
         public void AddAsset(Asset asset)
