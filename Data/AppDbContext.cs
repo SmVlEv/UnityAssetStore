@@ -29,9 +29,9 @@ namespace UnityAssetStore.Data
             new Category { Id = 3, Name = "Textures" }
         );
             modelBuilder.Entity<CartItem>()
-        .HasOne(c => c.Asset)
-        .WithMany()
-        .HasForeignKey(c => c.AssetId);
+                .HasOne(c => c.Asset)
+                .WithMany()
+                .HasForeignKey(c => c.AssetId);
 
             // 🔹 Seed данных: товары по умолчанию
             modelBuilder.Entity<Asset>().HasData(

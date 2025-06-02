@@ -1,8 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using UnityAssetStore.Services;
+using UnityAssetStore.Models;
+using System.Security.Claims;
 
 namespace UnityAssetStore.Controllers
 {
+    [Authorize]
     public class OrdersController : Controller
     {
         private readonly IOrderService _orderService;
@@ -12,24 +17,58 @@ namespace UnityAssetStore.Controllers
             _orderService = orderService;
         }
 
-        public IActionResult Index()
+        // GET: /Orders/Index
+        public async Task<IActionResult> Index()
         {
-            var orders = _orderService.GetAllOrders();
+            if (!User.Identity.IsAuthenticated)
+            {
+                var returnUrl = Url.Action("Index", "Orders");
+                return RedirectToAction("Login", "Account", new { returnUrl });
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var orders = await _orderService.GetOrdersByUserIdAsync(userId);
+
             return View(orders);
         }
 
-        public IActionResult Details(int id)
+        // GET: /Orders/Details/5
+        public async Task<IActionResult> Details(int id)
         {
-            var order = _orderService.GetOrderById(id);
+            var order = await _orderService.GetOrderByIdAsync(id);
             if (order == null) return NotFound();
+
             return View(order);
         }
 
+        // POST: /Orders/Checkout
         [HttpPost]
-        public IActionResult Create()
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Checkout()
         {
-            var order = _orderService.CreateOrder();
-            return RedirectToAction("Details", new { id = order.Id });
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            try
+            {
+                int orderId = await _orderService.CreateOrderFromCartAsync(userId);
+                return RedirectToAction("OrderConfirmed", new { id = orderId });
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return RedirectToAction("Index", "Cart");
+            }
+        }
+
+        // GET: /Orders/OrderConfirmed
+        public IActionResult OrderConfirmed(int id)
+        {
+            ViewBag.OrderId = id;
+            return View();
         }
     }
 }

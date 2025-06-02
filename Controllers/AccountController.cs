@@ -69,7 +69,7 @@ namespace UnityAssetStore.Controllers
         // GET: /Account/Login
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login(string returnUrl)
         {
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -79,33 +79,32 @@ namespace UnityAssetStore.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(
-                    model.Username,
-                    model.Password,
-                    model.RememberMe,
-                    lockoutOnFailure: false);
+                return View(model);
+            }
 
-                if (result.Succeeded)
+            var result = await _signInManager.PasswordSignInAsync(
+                model.Username,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 {
-                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                    {
-                        return Redirect(model.ReturnUrl);
-                    }
-                    else
-                    {
-                        return RedirectToAction("Index", "Home");
-                    }
+                    return Redirect(returnUrl);
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Неверный логин или пароль.");
+                    return RedirectToAction("Index", "Home");
                 }
             }
 
+            ModelState.AddModelError(string.Empty, "Неверный логин или пароль.");
             return View(model);
         }
 

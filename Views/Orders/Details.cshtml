@@ -1,22 +1,29 @@
 ﻿@model UnityAssetStore.Models.Order
 
-@{
-    ViewData["Title"] = $"Заказ №{Model.Id}";
-}
-
 <h2>Заказ №@Model.Id</h2>
-<p><strong>Дата:</strong> @Model.OrderDate</p>
+<p><strong>Дата:</strong> @Model.OrderDate.ToString("yyyy-MM-dd")</p>
 <p><strong>Статус:</strong> @Model.Status</p>
-<p><strong>Общая сумма:</strong> @Model.TotalAmount.ToString("C")</p>
+<p><strong>Итого:</strong> @Model.TotalAmount.ToString("C")</p>
 
-<h4>Товары:</h4>
-<ul>
-    @foreach (var item in Model.Items)
-    {
-        <li>
-            @item.Asset.Name — @item.Quantity x @item.UnitPrice.ToString("C")
-        </li>
-    }
-</ul>
-
-<a asp-action="Index" class="btn btn-secondary">Назад к списку заказов</a>
+<h3>Позиции заказа</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Количество</th>
+            <th>Цена за штуку</th>
+            <th>Итого</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.Asset?.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("C")</td>
+                <td>@((item.Quantity * item.UnitPrice).ToString("C"))</td>
+            </tr>
+        }
+    </tbody>
+</table>
