@@ -8,6 +8,7 @@
 <h2>Добавить новую категорию</h2>
 
 <form asp-area="Admin" asp-controller="Category" asp-action="Add" method="post">
+    @Html.AntiForgeryToken()
     <div class="mb-3">
         <label asp-for="Name"></label>
         <input asp-for="Name" class="form-control" />

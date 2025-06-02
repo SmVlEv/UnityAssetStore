@@ -33,9 +33,10 @@ builder.Services.AddControllersWithViews();
 
 // 5. Регистрация сервисов
 builder.Services.AddScoped<IAssetService, AssetService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
+
 
 // 6. Добавь Razor Pages (если используешь Identity UI)
 builder.Services.AddRazorPages();

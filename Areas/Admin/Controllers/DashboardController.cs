@@ -25,7 +25,13 @@ namespace UnityAssetStore.Areas.Admin.Controllers
         // GET: /Admin/Dashboard/Index
         public IActionResult Index()
         {
-            return View();
+            var assets = _assetService.GetAllAssets();
+            if (assets == null)
+            {
+                throw new InvalidOperationException("Не удалось загрузить список товаров.");
+            }
+
+            return View(assets);
         }
 
         // GET: /Admin/Dashboard/Add
