@@ -35,6 +35,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IAssetService, AssetService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 // 6. Добавь Razor Pages (если используешь Identity UI)
 builder.Services.AddRazorPages();
@@ -93,13 +94,14 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Маршруты
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
+// Маршрут для Area "Admin" (должен быть выше дефолтного)
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
 

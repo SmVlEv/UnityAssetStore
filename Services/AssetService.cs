@@ -27,25 +27,43 @@ namespace UnityAssetStore.Services
                 .FirstOrDefault(a => a.Id == id);
         }
 
-        public void AddAsset(Asset asset)
+        public async Task AddAssetAsync(Asset asset)
         {
             _context.Assets.Add(asset);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void UpdateAsset(Asset asset)
+        public async Task UpdateAssetAsync(int id, Asset updatedAsset)
         {
-            _context.Assets.Update(asset);
-            _context.SaveChanges();
+            var existingAsset = await _context.Assets.FindAsync(id);
+            if (existingAsset == null) throw new ArgumentException("Товар не найден", nameof(id));
+
+            existingAsset.Name = updatedAsset.Name;
+            existingAsset.Description = updatedAsset.Description;
+            existingAsset.Price = updatedAsset.Price;
+            existingAsset.PreviewImageUrl = updatedAsset.PreviewImageUrl;
+            existingAsset.CategoryId = updatedAsset.CategoryId;
+
+            await _context.SaveChangesAsync();
         }
 
-        public void DeleteAsset(int id)
+        public async Task DeleteAssetAsync(int id)
         {
-            var asset = _context.Assets.Find(id);
-            if (asset != null)
+            try
             {
+                var asset = await _context.Assets.FindAsync(id);
+                if (asset == null)
+                {
+                    throw new ArgumentException("Товар не найден", nameof(id));
+                }
+
                 _context.Assets.Remove(asset);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Обработка ошибки целостности базы данных
+                throw new InvalidOperationException("Не удалось удалить товар. Возможно, он используется в других записях.", ex);
             }
         }
     }

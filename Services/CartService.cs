@@ -5,6 +5,7 @@ using UnityAssetStore.Data;
 using UnityAssetStore.Models;
 using UnityAssetStore.Services;
 using System.Linq;
+using System.Threading.Tasks;
 
 public class CartService : ICartService
 {
@@ -16,7 +17,7 @@ public class CartService : ICartService
         _context = context;
     }
 
-    // --- Работа с Session (для неавторизованных пользователей) ---
+    // --- Работа с Session (гости) ---
 
     public ShoppingCart GetCart(ISession session)
     {
@@ -26,7 +27,7 @@ public class CartService : ICartService
 
         var cart = JsonConvert.DeserializeObject<ShoppingCart>(cartJson);
 
-        // Загрузка данных о товарах
+        // Загружаем Asset для отображения
         foreach (var item in cart.Items)
         {
             item.Asset = _context.Assets.Find(item.AssetId);
@@ -51,12 +52,6 @@ public class CartService : ICartService
         else
         {
             item.Quantity++;
-        }
-
-        // Загрузим Asset для корректного отображения
-        foreach (var cartItem in cart.Items)
-        {
-            cartItem.Asset = _context.Assets.Find(cartItem.AssetId);
         }
 
         SaveCart(session, cart);
@@ -88,7 +83,7 @@ public class CartService : ICartService
         session.SetString(SessionKey, cartJson);
     }
 
-    // --- Работа с UserId (для авторизованных пользователей) ---
+    // --- Работа с UserId (авторизованные пользователи) ---
 
     public async Task AddToCartAsync(string userId, int assetId)
     {
@@ -113,6 +108,7 @@ public class CartService : ICartService
         else
         {
             existingItem.Quantity += 1;
+            _context.CartItems.Update(existingItem);
         }
 
         await _context.SaveChangesAsync();
@@ -122,7 +118,8 @@ public class CartService : ICartService
     {
         var item = await _context.CartItems
             .Include(c => c.Asset)
-            .FirstOrDefaultAsync(c => c.UserId == userId && c.AssetId == assetId);
+            .Where(c => c.UserId == userId)
+            .FirstOrDefaultAsync(c => c.AssetId == assetId);
 
         if (item != null)
         {
@@ -135,7 +132,7 @@ public class CartService : ICartService
     {
         return _context.CartItems
             .Where(c => c.UserId == userId)
-            .Include(c => c.Asset) // обязательно загружаем связь с Asset
+            .Include(c => c.Asset)
             .ToList();
     }
 }

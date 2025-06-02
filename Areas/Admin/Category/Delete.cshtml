@@ -1,0 +1,15 @@
+﻿@model UnityAssetStore.Models.Category
+
+@{
+    ViewData["Title"] = "Удалить категорию";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Вы уверены, что хотите удалить эту категорию?</h2>
+<p><strong>@Model.Name</strong></p>
+
+<form asp-area="Admin" asp-controller="Category" asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Удалить</button>
+    <a asp-action="Index" class="btn btn-secondary">Отмена</a>
+</form>

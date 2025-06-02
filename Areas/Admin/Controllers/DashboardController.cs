@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Diagnostics;
 using UnityAssetStore.Areas.Admin.Models;
 using UnityAssetStore.Data;
 using UnityAssetStore.Models;
@@ -24,30 +25,26 @@ namespace UnityAssetStore.Areas.Admin.Controllers
         // GET: /Admin/Dashboard/Index
         public IActionResult Index()
         {
-            var assets = _assetService.GetAllAssets();
-            return View(assets);
+            return View();
         }
 
         // GET: /Admin/Dashboard/Add
         [HttpGet]
         public IActionResult Add()
         {
-            SetCategorySelectList();
             return View();
         }
 
         // POST: /Admin/Dashboard/Add
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Add(Asset model)
+        public async Task<IActionResult> Add(Asset model)
         {
             if (!ModelState.IsValid)
             {
-                SetCategorySelectList();
                 return View(model);
             }
-
-            _assetService.AddAsset(model);
+            await _assetService.AddAssetAsync(model);
             return RedirectToAction("Index");
         }
 
@@ -57,23 +54,19 @@ namespace UnityAssetStore.Areas.Admin.Controllers
         {
             var asset = _assetService.GetAssetById(id);
             if (asset == null) return NotFound();
-
-            SetCategorySelectList();
             return View(asset);
         }
 
         // POST: /Admin/Dashboard/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Asset model)
+        public async Task<IActionResult> Edit(Asset model)
         {
             if (!ModelState.IsValid)
             {
-                SetCategorySelectList();
                 return View(model);
             }
-
-            _assetService.UpdateAsset(model);
+            await _assetService.UpdateAssetAsync(model.Id, model);
             return RedirectToAction("Index");
         }
 
@@ -83,24 +76,28 @@ namespace UnityAssetStore.Areas.Admin.Controllers
         {
             var asset = _assetService.GetAssetById(id);
             if (asset == null) return NotFound();
-
             return View(asset);
         }
 
         // POST: /Admin/Dashboard/Delete
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(Asset model)
+        public IActionResult DeleteConfirmed(int id)
         {
-            _assetService.DeleteAsset(model.Id);
+            _assetService.DeleteAssetAsync(id).GetAwaiter().GetResult();
             return RedirectToAction("Index");
         }
 
         // Вспомогательный метод для выбора категории
-        private void SetCategorySelectList()
+        private void SetCategorySelectList(int selectedCategoryId = 0)
         {
             var categories = _context.Categories.ToList();
-            ViewBag.Categories = new SelectList(categories, "Id", "Name");
+            if (categories == null || !categories.Any())
+            {
+                throw new InvalidOperationException("Категории не найдены в базе данных.");
+            }
+
+            ViewBag.Categories = new SelectList(categories, "Id", "Name", selectedCategoryId);
         }
     }
 }

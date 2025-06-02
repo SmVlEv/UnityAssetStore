@@ -5,6 +5,10 @@
       "PackagePath": "staticwebassets\\UnityAssetStore.e75ch77o0j.bundle.scp.css"
     },
     {
+      "Id": "C:\\Users\\SVEK\\source\\repos\\UnityAssetStore\\UnityAssetStore\\wwwroot\\css\\admin.css",
+      "PackagePath": "staticwebassets\\css\\admin.css"
+    },
+    {
       "Id": "C:\\Users\\SVEK\\source\\repos\\UnityAssetStore\\UnityAssetStore\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },

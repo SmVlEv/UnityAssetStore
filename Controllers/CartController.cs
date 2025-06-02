@@ -51,7 +51,7 @@ namespace UnityAssetStore.Controllers
             {
                 _cartService.AddToCart(HttpContext.Session, assetId);
             }
-
+            TempData["SuccessMessage"] = "Товар успешно добавлен в корзину!";
             return RedirectToAction("Index", "Assets");
         }
 

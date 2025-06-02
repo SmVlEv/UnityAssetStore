@@ -22,9 +22,7 @@ namespace UnityAssetStore.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
-            {
                 return RedirectToAction("Login", "Account");
-            }
 
             var orders = await _orderService.GetOrdersByUserIdAsync(userId);
             return View(orders);

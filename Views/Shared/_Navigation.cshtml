@@ -18,8 +18,16 @@
                     <a class="nav-link" asp-controller="Cart" asp-action="Index">Корзина</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-controller="Orders" asп-action="Index">Заказы</a>
+                    <a class="nav-link" asp-controller="Orders" asp-action="Index">Мои заказы</a>
                 </li>
+
+                <!-- Ссылка на админку (только для администраторов) -->
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-success" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Админка</a>
+                    </li>
+                }
             </ul>
 
             <!-- Правая часть меню: Войти / Зарегистрироваться / Выйти -->

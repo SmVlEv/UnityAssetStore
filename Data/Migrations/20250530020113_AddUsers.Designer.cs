@@ -115,7 +115,6 @@ namespace UnityAssetStore.Migrations
                             Id = 3,
                             CategoryId = 3,
                             Description = "Высококачественные текстуры пустыни для Unity Terrains.",
-                            FilePath = "/uploads/assets/desert_textures.unitypackage",
                             Name = "Desert Terrain Textures",
                             PreviewImageUrl = "/images/desert_textures.jpg",
                             Price = 14.99m

@@ -200,7 +200,7 @@ namespace UnityAssetStore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FilePath")
+                    b.Property<string>("")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -228,7 +228,6 @@ namespace UnityAssetStore.Migrations
                             Id = 1,
                             CategoryId = 1,
                             Description = "Набор низкополигональных деревьев и кустов для Unity.",
-                            FilePath = "/uploads/assets/low_poly_forest.unitypackage",
                             Name = "Low Poly Forest Pack",
                             PreviewImageUrl = "/images/forest_pack.jpg",
                             Price = 29.99m
@@ -238,7 +237,6 @@ namespace UnityAssetStore.Migrations
                             Id = 2,
                             CategoryId = 2,
                             Description = "Плагин Cinemachine для создания динамичных камер в Unity.",
-                            FilePath = "/uploads/assets/cinemachine_utilities.unitypackage",
                             Name = "Cinemachine Utilities",
                             PreviewImageUrl = "/images/cinemachine.jpg",
                             Price = 19.99m
@@ -248,7 +246,6 @@ namespace UnityAssetStore.Migrations
                             Id = 3,
                             CategoryId = 3,
                             Description = "Высококачественные текстуры пустыни для Unity Terrains.",
-                            FilePath = "/uploads/assets/desert_textures.unitypackage",
                             Name = "Desert Terrain Textures",
                             PreviewImageUrl = "/images/desert_textures.jpg",
                             Price = 14.99m

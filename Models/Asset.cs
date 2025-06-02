@@ -17,9 +17,6 @@ namespace UnityAssetStore.Models
         public decimal Price { get; set; }
 
         public string PreviewImageUrl { get; set; } // URL или путь к изображению
-
-        public string FilePath { get; set; } // Путь к .unitypackage файлу
-
         public int CategoryId { get; set; }
         public Category Category { get; set; }
     }
