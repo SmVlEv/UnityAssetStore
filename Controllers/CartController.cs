@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using UnityAssetStore.Models;
 using UnityAssetStore.Services;
+using UnityAssetStore.Models;
+using System.Security.Claims;
 
 namespace UnityAssetStore.Controllers
 {
@@ -14,6 +14,7 @@ namespace UnityAssetStore.Controllers
             _cartService = cartService;
         }
 
+        // GET: /Cart/Index
         public IActionResult Index()
         {
             if (User.Identity.IsAuthenticated)
@@ -21,11 +22,11 @@ namespace UnityAssetStore.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var cartItems = _cartService.GetCartItems(userId);
 
-                // Преобразуем в ShoppingCart
+                // Возвращаем список товаров как ShoppingCart
                 var shoppingCart = new ShoppingCart();
                 foreach (var item in cartItems)
                 {
-                    shoppingCart.Items.Add(item); // CartItem наследуется от CartItem
+                    shoppingCart.Items.Add(item); // Item == OrderItem
                 }
 
                 return View(shoppingCart);
@@ -37,29 +38,31 @@ namespace UnityAssetStore.Controllers
             }
         }
 
+        // POST: /Cart/AddToCart
         [HttpPost]
         public IActionResult AddToCart(int assetId)
         {
             if (User.Identity.IsAuthenticated)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                _cartService.AddToCart(userId, assetId);
+                _cartService.AddToCartAsync(userId, assetId).GetAwaiter().GetResult(); // Синхронная версия
             }
             else
             {
                 _cartService.AddToCart(HttpContext.Session, assetId);
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Assets");
         }
 
+        // POST: /Cart/RemoveFromCart
         [HttpPost]
         public IActionResult RemoveFromCart(int assetId)
         {
             if (User.Identity.IsAuthenticated)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                _cartService.RemoveFromCart(userId, assetId);
+                _cartService.RemoveFromCartAsync(userId, assetId).GetAwaiter().GetResult(); // Синхронная версия
             }
             else
             {

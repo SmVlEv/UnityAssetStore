@@ -20,15 +20,13 @@ namespace UnityAssetStore.Controllers
         // GET: /Orders/Index
         public async Task<IActionResult> Index()
         {
-            if (!User.Identity.IsAuthenticated)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
             {
-                var returnUrl = Url.Action("Index", "Orders");
-                return RedirectToAction("Login", "Account", new { returnUrl });
+                return RedirectToAction("Login", "Account");
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var orders = await _orderService.GetOrdersByUserIdAsync(userId);
-
             return View(orders);
         }
 

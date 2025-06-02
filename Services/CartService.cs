@@ -90,20 +90,20 @@ public class CartService : ICartService
 
     // --- Работа с UserId (для авторизованных пользователей) ---
 
-    public void AddToCart(string userId, int assetId)
+    public async Task AddToCartAsync(string userId, int assetId)
     {
-        var existingItem = _context.CartItems
+        var existingItem = await _context.CartItems
             .Where(c => c.UserId == userId && c.AssetId == assetId)
             .Include(c => c.Asset)
-            .FirstOrDefault();
+            .FirstOrDefaultAsync();
 
         if (existingItem == null)
         {
-            var asset = _context.Assets.Find(assetId);
+            var asset = await _context.Assets.FindAsync(assetId);
             if (asset == null)
                 throw new ArgumentException("Товар не найден", nameof(assetId));
 
-            _context.CartItems.Add(new CartItem
+            await _context.CartItems.AddAsync(new CartItem
             {
                 UserId = userId,
                 AssetId = assetId,
@@ -115,19 +115,19 @@ public class CartService : ICartService
             existingItem.Quantity += 1;
         }
 
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public void RemoveFromCart(string userId, int assetId)
+    public async Task RemoveFromCartAsync(string userId, int assetId)
     {
-        var item = _context.CartItems
+        var item = await _context.CartItems
             .Include(c => c.Asset)
-            .FirstOrDefault(c => c.UserId == userId && c.AssetId == assetId);
+            .FirstOrDefaultAsync(c => c.UserId == userId && c.AssetId == assetId);
 
         if (item != null)
         {
             _context.CartItems.Remove(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 

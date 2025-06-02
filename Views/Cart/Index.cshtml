@@ -1,4 +1,4 @@
-﻿@model ShoppingCart
+﻿@model UnityAssetStore.Models.ShoppingCart
 
 <h2>Корзина</h2>
 
@@ -11,9 +11,10 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Товар</th>
+                <th>Название</th>
+                <th>Цена за штуку</th>
                 <th>Количество</th>
-                <th>Цена</th>
+                <th>Итого</th>
                 <th>Действие</th>
             </tr>
         </thead>
@@ -21,9 +22,10 @@ else
             @foreach (var item in Model.Items)
             {
                 <tr>
-                    <td>@(item.Asset != null ? item.Asset.Name : "Неизвестный товар")</td> <!-- Обработка null -->
+                    <td>@item.Asset?.Name</td>
+                    <td>@item.Asset?.Price.ToString("C")</td>
                     <td>@item.Quantity</td>
-                    <td>@(item.Asset.Price * item.Quantity)</td>
+                    <td>@((item.Asset?.Price ?? 0) * item.Quantity)</td>
                     <td>
                         <form asp-action="RemoveFromCart" method="post">
                             <input type="hidden" name="assetId" value="@item.AssetId" />
@@ -34,6 +36,10 @@ else
             }
         </tbody>
     </table>
+
+    <form asp-controller="Orders" asp-action="Checkout" method="post">
+        <button type="submit" class="btn btn-success">Оформить заказ</button>
+    </form>
 }
 
 <a asp-controller="Assets" asp-action="Index" class="btn btn-primary">Продолжить покупки</a>
